@@ -83,6 +83,23 @@ public class DataApp {
                 System.out.println("Неверный выбор.");
                 break;
         }
+        dataList.sort(new Comparator<Data>() {
+            @Override
+            public int compare(Data d1, Data d2) {
+                boolean d1Even = d1.getNumber() % 2 == 0;
+                boolean d2Even = d2.getNumber() % 2 == 0;
+
+                if (d1Even && d2Even) {
+                    return Integer.compare(d1.getNumber(), d2.getNumber());
+                } else if (!d1Even && !d2Even) {
+                    return 0;
+                } else if (d1Even) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            }
+        });
         sortEvenNumbers(dataList);
         System.out.println("Сохраненные данные:");
         for (Data data : dataList) {
