@@ -1,4 +1,6 @@
+
 public class Data {
+
     private String letter;
     private int number;
     private boolean logical;
@@ -9,12 +11,16 @@ public class Data {
         this.logical = logical;
     }
 
+    public int getNumber() {
+        return number;
+    }
+
     @Override
     public String toString() {
-        return "Data: " +
-                "слово= " + letter +
-                ", число=" + number +
-                ", логика=" + logical + "\n";
+        return "Data: "
+                + "слово= " + letter
+                + ", число=" + number
+                + ", логика=" + logical + "\n";
     }
 
 }
