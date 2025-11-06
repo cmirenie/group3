@@ -1,7 +1,7 @@
 public class Data {
-    private String letter; // String
-    private int number;    // int
-    private boolean logical; // boolean
+    private String letter;
+    private int number;
+    private boolean logical;
 
     public Data(String letter, int number, boolean logical) {
         this.letter = letter;
@@ -16,4 +16,5 @@ public class Data {
                 ", число=" + number +
                 ", логика=" + logical + "\n";
     }
+
 }
