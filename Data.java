@@ -1,5 +1,5 @@
 
-public class Data {
+public class Data implements Comparable<Data> {
 
     private String letter;
     private int number;
@@ -21,6 +21,21 @@ public class Data {
                 + "слово= " + letter
                 + ", число=" + number
                 + ", логика=" + logical + "\n";
+    }
+
+    @Override
+    public int compareTo(Data other) {
+        int cmp = this.letter.compareTo(other.letter);
+        if (cmp != 0) {
+            return cmp;
+        }
+
+        cmp = Integer.compare(this.number, other.number);
+        if (cmp != 0) {
+            return cmp;
+        }
+
+        return Boolean.compare(this.logical, other.logical);
     }
 
 }
