@@ -19,6 +19,9 @@ public class DataApp {
 
     private static final Scanner scanner = new Scanner(System.in);
     private static List<Data> dataList = new ArrayList<>();
+    private static CollectionCommandExecutor collectionCommandExecutor = new CollectionCommandExecutor(new EmptyCollectionStrategy());
+    private static InputCommandExecutor inputCommandExecutor = new InputCommandExecutor(new EmptyInputStrategy());
+    private static SearchCommandExecutor searchCommandExecutor = new SearchCommandExecutor(new EmptySearchStrategy());
     public static void main(String[] args) {
         while (true) {
             printMainMenu();
@@ -28,26 +31,6 @@ public class DataApp {
                 case 1 -> {
                     inputDataMenu();
                 }
-                break;
-
-            default:
-                System.out.println("Неверный выбор.");
-                break;
-        }
-        dataList.sort(new Comparator<Data>() {
-            @Override
-            public int compare(Data d1, Data d2) {
-                boolean d1Even = d1.getNumber() % 2 == 0;
-                boolean d2Even = d2.getNumber() % 2 == 0;
-
-                if (d1Even && d2Even) {
-                    return Integer.compare(d1.getNumber(), d2.getNumber());
-                } else if (!d1Even && !d2Even) {
-                    return 0;
-                } else if (d1Even) {
-                    return -1;
-                } else {
-                    return 1;
                 case 2 -> {
                     sortMenu();
                 }
@@ -55,17 +38,18 @@ public class DataApp {
                     binarySearchMenu();
                 }
                 case 4 -> {
+                    collectionCommandExecutor.setStrategy(new TransferToCustomCollectionStrategy());
+                    collectionCommandExecutor.executeCommand(dataList);
                 }
                 case 5 -> {
+                    collectionCommandExecutor.setStrategy(new CountStrategy());
+                    collectionCommandExecutor.executeCommand(dataList);
                 }
                 case 6 -> {
                     return;
                 }
                 default -> System.out.println("Нет такого пункта меню");
             }
-        });
-        sortEvenNumbers(dataList);
-        System.out.println("Сохраненные данные:");
         }
     }
 
@@ -90,10 +74,16 @@ public class DataApp {
         scanner.nextLine();
         switch (choice) {
             case 1 -> {
+                inputCommandExecutor.setStrategy(new InputManualStrategy(scanner));
+                dataList = inputCommandExecutor.executeCommand();
             }
             case 2 -> {
+                inputCommandExecutor.setStrategy(new InputRandomStrategy(scanner));
+                dataList = inputCommandExecutor.executeCommand();
             }
             case 3 -> {
+                inputCommandExecutor.setStrategy(new InputFromFileStrategy(scanner));
+                dataList = inputCommandExecutor.executeCommand();
             }
             case 4 -> {
             }
@@ -114,12 +104,20 @@ public class DataApp {
         scanner.nextLine();
         switch (choice) {
             case 1 -> {
+                collectionCommandExecutor.setStrategy(new SortByLetterStrategy());
+                finalSortCommandsRuner();
             }
             case 2 -> {
+                collectionCommandExecutor.setStrategy(new SortByNumberStrategy());
+                finalSortCommandsRuner();
             }
             case 3 -> {
+                collectionCommandExecutor.setStrategy(new SortByLogicalStrategy());
+                finalSortCommandsRuner();
             }
             case 4 -> {
+                collectionCommandExecutor.setStrategy(new SortBySpecialStrategy());
+                finalSortCommandsRuner();
             }
             case 5 -> {
             }
@@ -139,10 +137,16 @@ public class DataApp {
         scanner.nextLine();
         switch (choice) {
             case 1 -> {
+                searchCommandExecutor.setStrategy(new SearchByLetterStrategy());
+                finalSearchCommandsRuner();
             }
             case 2 -> {
+                searchCommandExecutor.setStrategy(new SearchByNumberStrategy());
+                finalSearchCommandsRuner();
             }
             case 3 -> {
+                searchCommandExecutor.setStrategy(new SearchByLogicalStrategy());
+                finalSearchCommandsRuner();
             }
             case 4 -> {
             }
@@ -150,26 +154,31 @@ public class DataApp {
         }
     }
 
+    private static void finalSortCommandsRuner() {
+        collectionCommandExecutor.executeCommand(dataList);
+        printSortResult();
+        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy());
+        collectionCommandExecutor.executeCommand(dataList);
+    }
+
+    private static void printSortResult() {
+        System.out.println("Отсортированные данные:");
         for (Data data : dataList) {
             System.out.println(data);
         }
     }
 
-    public static void sortEvenNumbers(List<Data> list) {
-        List<Integer> evenIndices = new ArrayList<>();
-        List<Data> evenValues = new ArrayList<>();
+    private static void finalSearchCommandsRuner() {
+        List<Data> result = searchCommandExecutor.executeCommand(dataList);
+        printSearchResult(result);
+        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy());
+        collectionCommandExecutor.executeCommand(result);
+    }
 
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getNumber() % 2 == 0) {
-                evenIndices.add(i);
-                evenValues.add(list.get(i));
-            }
-        }
-
-        evenValues.sort(Comparator.comparingInt(Data::getNumber));
-
-        for (int i = 0; i < evenIndices.size(); i++) {
-            list.set(evenIndices.get(i), evenValues.get(i));
+    private static void printSearchResult(List<Data> result) {
+        System.out.println("Найденные данные:");
+        for (Data data : result) {
+            System.out.println(data);
         }
     }
 }
