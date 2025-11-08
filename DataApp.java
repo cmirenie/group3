@@ -157,7 +157,7 @@ public class DataApp {
     private static void finalSortCommandsRuner() {
         collectionCommandExecutor.executeCommand(dataList);
         printSortResult();
-        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy());
+        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy(scanner));
         collectionCommandExecutor.executeCommand(dataList);
     }
 
@@ -171,7 +171,7 @@ public class DataApp {
     private static void finalSearchCommandsRuner() {
         List<Data> result = searchCommandExecutor.executeCommand(dataList);
         printSearchResult(result);
-        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy());
+        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy(scanner));
         collectionCommandExecutor.executeCommand(result);
     }
 

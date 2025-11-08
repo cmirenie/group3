@@ -11,7 +11,8 @@ public class Data implements Comparable<Data> {
         this.number = number;
         this.logical = logical;
     }
-
+    public String getLetter() { return letter; }
+    public boolean isLogical() { return logical; }
     public int getNumber() {
         return number;
     }
