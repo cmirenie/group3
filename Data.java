@@ -15,6 +15,14 @@ public class Data implements Comparable<Data> {
         return number;
     }
 
+    public String getLetter() {
+        return letter;
+    }
+
+    public boolean getLogical() {
+        return logical;
+    }
+
     @Override
     public String toString() {
         return "Data: "
