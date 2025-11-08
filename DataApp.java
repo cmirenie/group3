@@ -1,6 +1,8 @@
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -8,6 +10,30 @@ import java.util.List;
 import java.util.Scanner;
 
 public class DataApp {
+
+    private static void saveToFile(List<Data> dataList, String filename) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filename))) {
+            for (Data data : dataList) {
+                writer.write(data.toString());
+            }
+            System.out.println("Результат сохранен в файл: " + filename);
+        } catch (IOException e) {
+            System.out.println("Ошибка при сохранении файла: " + e.getMessage());
+        }
+    }
+
+    public static void bubbleSort(List<Data> list, Comparator<Data> cmp) {
+        int n = list.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (cmp.compare(list.get(j), list.get(j + 1)) > 0) {
+                    Data temp = list.get(j);
+                    list.set(j, list.get(j + 1));
+                    list.set(j + 1, temp);
+                }
+            }
+        }
+    }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
@@ -83,23 +109,35 @@ public class DataApp {
                 System.out.println("Неверный выбор.");
                 break;
         }
-        dataList.sort(new Comparator<Data>() {
-            @Override
-            public int compare(Data d1, Data d2) {
-                boolean d1Even = d1.getNumber() % 2 == 0;
-                boolean d2Even = d2.getNumber() % 2 == 0;
+        // 2.1 Сортировка по первому полю - letter
+        bubbleSort(dataList, Comparator.comparing(Data::getLetter));
+        saveToFile(dataList, "sort_by_letter.txt");
 
-                if (d1Even && d2Even) {
-                    return Integer.compare(d1.getNumber(), d2.getNumber());
-                } else if (!d1Even && !d2Even) {
-                    return 0;
-                } else if (d1Even) {
-                    return -1;
-                } else {
-                    return 1;
-                }
+        // 2.2 Сортировка по второму полю - number
+        bubbleSort(dataList, Comparator.comparingInt(Data::getNumber));
+        saveToFile(dataList, "sort_by_number.txt");
+
+        // 2.3 Сортировка по третьему полю - logical
+        bubbleSort(dataList, Comparator.comparing(Data::getLogical));
+        saveToFile(dataList, "sort_by_logical.txt");
+
+        // 2.4 Особая сортировка (ваша уже реализованная)
+        bubbleSort(dataList, (d1, d2) -> {
+            boolean d1Even = d1.getNumber() % 2 == 0;
+            boolean d2Even = d2.getNumber() % 2 == 0;
+
+            if (d1Even && d2Even) {
+                return Integer.compare(d1.getNumber(), d2.getNumber());
+            } else if (!d1Even && !d2Even) {
+                return 0;
+            } else if (d1Even) {
+                return -1;
+            } else {
+                return 1;
             }
         });
+        saveToFile(dataList, "special_sort.txt");
+
         sortEvenNumbers(dataList);
         System.out.println("Сохраненные данные:");
         for (Data data : dataList) {
