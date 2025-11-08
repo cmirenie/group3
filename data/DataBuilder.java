@@ -1,3 +1,5 @@
+package data;
+
 public class DataBuilder {
     private String letter;
     private int number;

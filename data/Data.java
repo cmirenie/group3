@@ -1,3 +1,4 @@
+package data;
 
 public class Data implements Comparable<Data> {
 
@@ -17,7 +18,7 @@ public class Data implements Comparable<Data> {
 
     @Override
     public String toString() {
-        return "Data: "
+        return "data.Data: "
                 + "слово= " + letter
                 + ", число=" + number
                 + ", логика=" + logical + "\n";

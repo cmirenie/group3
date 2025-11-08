@@ -1,128 +1,184 @@
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+
+import collectionComandExecutor.CollectionCommandExecutor;
+import collectionComandExecutor.commands.*;
+import data.Data;
+import inputCommandExecutor.InputCommandExecutor;
+import inputCommandExecutor.commands.*;
+import searchCommandExecutor.SearchCommandExecutor;
+import searchCommandExecutor.commands.EmptySearchStrategy;
+import searchCommandExecutor.commands.SearchByLetterStrategy;
+import searchCommandExecutor.commands.SearchByLogicalStrategy;
+import searchCommandExecutor.commands.SearchByNumberStrategy;
+
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 
 public class DataApp {
 
+    private static final Scanner scanner = new Scanner(System.in);
+    private static List<Data> dataList = new ArrayList<>();
+    private static CollectionCommandExecutor collectionCommandExecutor = new CollectionCommandExecutor(new EmptyCollectionStrategy());
+    private static InputCommandExecutor inputCommandExecutor = new InputCommandExecutor(new EmptyInputStrategy());
+    private static SearchCommandExecutor searchCommandExecutor = new SearchCommandExecutor(new EmptySearchStrategy());
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        List<Data> dataList = new ArrayList<>();
-
-        System.out.println("Выберите способ ввода данных:\n1 - Ввести данные вручную\n2 - Сгенерировать случайные данные\n3 - загрузить из файла");
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // consume the newline
-
-        switch (choice) {
-            case 1:
-                System.out.println("Введите данные (слово, число, true/false):");
-                String userInput = scanner.nextLine();
-                String[] fields = userInput.split(",");
-
-                if (fields.length == 3) {
-                    try {
-                        String letter = fields[0].trim();
-                        int number = Integer.parseInt(fields[1].trim());
-                        boolean logical = Boolean.parseBoolean(fields[2].trim());
-
-                        Data userData = new DataBuilder()
-                                .setLetter(letter)
-                                .setNumber(number)
-                                .setLogical(logical)
-                                .build();
-
-                        dataList.add(userData);
-                    } catch (NumberFormatException e) {
-                        System.out.println("Ошибка: поле 2 должно быть целым числом.");
-                    }
-                } else {
-                    System.out.println("Ошибка: необходимо ввести 3 поля.");
+        while (true) {
+            printMainMenu();
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+            switch (choice) {
+                case 1 -> {
+                    inputDataMenu();
                 }
-                break;
-
-            case 2:
-                for (int i = 0; i < 3; i++) { // Генерируем 3 случайных объекта
-                    dataList.add(RandomDataGenerator.generateRandomData());
+                case 2 -> {
+                    sortMenu();
                 }
-                break;
-
-            case 3:
-                System.out.println("Введите путь к файлу:");
-                String filePath = scanner.nextLine();
-                try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-                    String line;
-                    while ((line = br.readLine()) != null) {
-                        String[] fileFields = line.split(",");
-                        if (fileFields.length == 3) {
-                            try {
-                                String field1 = fileFields[0].trim();
-                                int field2 = Integer.parseInt(fileFields[1].trim());
-                                boolean field3 = Boolean.parseBoolean(fileFields[2].trim());
-
-                                Data fileData = new DataBuilder()
-                                        .setLetter(field1)
-                                        .setNumber(field2)
-                                        .setLogical(field3)
-                                        .build();
-                                dataList.add(fileData);
-                            } catch (NumberFormatException e) {
-                                System.out.println("Ошибка при чтении файла: поле 2 должно быть целым числом.");
-                            }
-                        }
-                    }
-                } catch (IOException e) {
-                    System.out.println("Ошибка при чтении файла: " + e.getMessage());
+                case 3 -> {
+                    binarySearchMenu();
                 }
-                break;
-
-            default:
-                System.out.println("Неверный выбор.");
-                break;
-        }
-        dataList.sort(new Comparator<Data>() {
-            @Override
-            public int compare(Data d1, Data d2) {
-                boolean d1Even = d1.getNumber() % 2 == 0;
-                boolean d2Even = d2.getNumber() % 2 == 0;
-
-                if (d1Even && d2Even) {
-                    return Integer.compare(d1.getNumber(), d2.getNumber());
-                } else if (!d1Even && !d2Even) {
-                    return 0;
-                } else if (d1Even) {
-                    return -1;
-                } else {
-                    return 1;
+                case 4 -> {
+                    collectionCommandExecutor.setStrategy(new TransferToCustomCollectionStrategy());
+                    collectionCommandExecutor.executeCommand(dataList);
                 }
+                case 5 -> {
+                    collectionCommandExecutor.setStrategy(new CountStrategy());
+                    collectionCommandExecutor.executeCommand(dataList);
+                }
+                case 6 -> {
+                    return;
+                }
+                default -> System.out.println("Нет такого пункта меню");
             }
-        });
-        sortEvenNumbers(dataList);
-        System.out.println("Сохраненные данные:");
+        }
+    }
+
+    private static void printMainMenu() {
+        System.out.println("1. Получить данные");
+        System.out.println("2. Отсортировать");
+        System.out.println("3. Бинарный поиск");
+        System.out.println("4. Передать данные в кастомные коллекции (доп 3)");
+        System.out.println("5. Посчитать количество вхождений элемента N в коллекцию (доп 4)");
+        System.out.println("6. Выход");
+        System.out.println("Выбор (1-6):");
+    }
+
+    private static void inputDataMenu() {
+        System.out.println("1. Ввести в ручную");
+        System.out.println("2. Заполнить случайно");
+        System.out.println("3. Из файла");
+        System.out.println("4. Назад");
+        System.out.println("Выбор (1-4):");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1 -> {
+                inputCommandExecutor.setStrategy(new InputManualStrategy(scanner));
+                dataList = inputCommandExecutor.executeCommand();
+            }
+            case 2 -> {
+                inputCommandExecutor.setStrategy(new InputRandomStrategy(scanner));
+                dataList = inputCommandExecutor.executeCommand();
+            }
+            case 3 -> {
+                inputCommandExecutor.setStrategy(new InputFromFileStrategy(scanner));
+                dataList = inputCommandExecutor.executeCommand();
+            }
+            case 4 -> {
+            }
+            default -> System.out.println("Нет такого пункта меню");
+
+        }
+    }
+
+    private static void sortMenu() {
+        System.out.println("1. По строковому полю");
+        System.out.println("2. По числовому полю");
+        System.out.println("3. По логическому полю");
+        System.out.println("4. Особая сортировка (доп 1)");
+        System.out.println("5.Назад");
+        System.out.println("Выбор (1-5):");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1 -> {
+                collectionCommandExecutor.setStrategy(new SortByLetterStrategy());
+                finalSortCommandsRuner();
+            }
+            case 2 -> {
+                collectionCommandExecutor.setStrategy(new SortByNumberStrategy());
+                finalSortCommandsRuner();
+            }
+            case 3 -> {
+                collectionCommandExecutor.setStrategy(new SortByLogicalStrategy());
+                finalSortCommandsRuner();
+            }
+            case 4 -> {
+                collectionCommandExecutor.setStrategy(new SortBySpecialStrategy());
+                finalSortCommandsRuner();
+            }
+            case 5 -> {
+            }
+            default -> System.out.println("Нет такого пункта меню");
+
+        }
+    }
+
+    private static void binarySearchMenu() {
+        System.out.println("1. По строковому полю");
+        System.out.println("2. По числовому полю");
+        System.out.println("3. По логическому полю");
+        System.out.println("4. Назад");
+        System.out.println("Выбор (1-5):");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1 -> {
+                searchCommandExecutor.setStrategy(new SearchByLetterStrategy());
+                finalSearchCommandsRuner();
+            }
+            case 2 -> {
+                searchCommandExecutor.setStrategy(new SearchByNumberStrategy());
+                finalSearchCommandsRuner();
+            }
+            case 3 -> {
+                searchCommandExecutor.setStrategy(new SearchByLogicalStrategy());
+                finalSearchCommandsRuner();
+            }
+            case 4 -> {
+            }
+            default -> System.out.println("Нет такого пункта меню");
+        }
+    }
+
+    private static void finalSortCommandsRuner() {
+        collectionCommandExecutor.executeCommand(dataList);
+        printSortResult();
+        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy());
+        collectionCommandExecutor.executeCommand(dataList);
+    }
+
+    private static void printSortResult() {
+        System.out.println("Отсортированные данные:");
         for (Data data : dataList) {
             System.out.println(data);
         }
-
     }
 
-    public static void sortEvenNumbers(List<Data> list) {
-        List<Integer> evenIndices = new ArrayList<>();
-        List<Data> evenValues = new ArrayList<>();
+    private static void finalSearchCommandsRuner() {
+        List<Data> result = searchCommandExecutor.executeCommand(dataList);
+        printSearchResult(result);
+        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy());
+        collectionCommandExecutor.executeCommand(result);
+    }
 
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).getNumber() % 2 == 0) {
-                evenIndices.add(i);
-                evenValues.add(list.get(i));
-            }
-        }
-
-        evenValues.sort(Comparator.comparingInt(Data::getNumber));
-
-        for (int i = 0; i < evenIndices.size(); i++) {
-            list.set(evenIndices.get(i), evenValues.get(i));
+    private static void printSearchResult(List<Data> result) {
+        System.out.println("Найденные данные:");
+        for (Data data : result) {
+            System.out.println(data);
         }
     }
 }
