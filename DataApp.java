@@ -6,10 +6,8 @@ import data.Data;
 import inputCommandExecutor.InputCommandExecutor;
 import inputCommandExecutor.commands.*;
 import searchCommandExecutor.SearchCommandExecutor;
+import searchCommandExecutor.commands.BinarySearchStrategy;
 import searchCommandExecutor.commands.EmptySearchStrategy;
-import searchCommandExecutor.commands.SearchByLetterStrategy;
-import searchCommandExecutor.commands.SearchByLogicalStrategy;
-import searchCommandExecutor.commands.SearchByNumberStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +20,7 @@ public class DataApp {
     private static CollectionCommandExecutor collectionCommandExecutor = new CollectionCommandExecutor(new EmptyCollectionStrategy());
     private static InputCommandExecutor inputCommandExecutor = new InputCommandExecutor(new EmptyInputStrategy());
     private static SearchCommandExecutor searchCommandExecutor = new SearchCommandExecutor(new EmptySearchStrategy());
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NoSuchFieldException {
         while (true) {
             printMainMenu();
             int choice = scanner.nextInt();
@@ -126,7 +124,7 @@ public class DataApp {
         }
     }
 
-    private static void binarySearchMenu() {
+    private static void binarySearchMenu() throws NoSuchFieldException {
         System.out.println("1. По строковому полю");
         System.out.println("2. По числовому полю");
         System.out.println("3. По логическому полю");
@@ -137,15 +135,24 @@ public class DataApp {
         scanner.nextLine();
         switch (choice) {
             case 1 -> {
-                searchCommandExecutor.setStrategy(new SearchByLetterStrategy());
+                searchCommandExecutor.setStrategy(new BinarySearchStrategy(
+                        Data.class.getDeclaredField("letter"),
+                        scanner
+                ));
                 finalSearchCommandsRuner();
             }
             case 2 -> {
-                searchCommandExecutor.setStrategy(new SearchByNumberStrategy());
+                searchCommandExecutor.setStrategy(new BinarySearchStrategy(
+                        Data.class.getDeclaredField("number"),
+                        scanner
+                ));
                 finalSearchCommandsRuner();
             }
             case 3 -> {
-                searchCommandExecutor.setStrategy(new SearchByLogicalStrategy());
+                searchCommandExecutor.setStrategy(new BinarySearchStrategy(
+                        Data.class.getDeclaredField("logical"),
+                        scanner
+                ));
                 finalSearchCommandsRuner();
             }
             case 4 -> {
@@ -176,9 +183,14 @@ public class DataApp {
     }
 
     private static void printSearchResult(List<Data> result) {
-        System.out.println("Найденные данные:");
-        for (Data data : result) {
-            System.out.println(data);
+        if (result.isEmpty()){
+            System.out.println("Ничего не найдено");
+        }
+        else {
+            System.out.println("Найденные данные:");
+            for (Data data : result) {
+                System.out.println(data);
+            }
         }
     }
 }
