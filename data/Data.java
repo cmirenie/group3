@@ -1,10 +1,27 @@
 package data;
 
+import java.util.Comparator;
+import java.util.List;
+
 public class Data implements Comparable<Data> {
 
     private String letter;
     private int number;
     private boolean logical;
+
+
+    public static void bubbleSort(List<Data> list, Comparator<Data> cmp) {
+        int n = list.size();
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = 0; j < n - i - 1; j++) {
+                if (cmp.compare(list.get(j), list.get(j + 1)) > 0) {
+                    Data temp = list.get(j);
+                    list.set(j, list.get(j + 1));
+                    list.set(j + 1, temp);
+                }
+            }
+        }
+    }
 
     public Data(String letter, int number, boolean logical) {
         this.letter = letter;
