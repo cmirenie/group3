@@ -10,12 +10,9 @@ import java.util.List;
  */
 
 public class SortByLetterStrategy implements CollectionStrategy {
-    public static void BubbleSortByLetter(List<Data> list) {
-    Data.bubbleSort(list, Comparator.comparing(Data::getLetter));
-    }
     @Override
     public void execute(List<Data> input) {
-
+        Data.bubbleSort(input, Comparator.comparing(Data::getLetter));
     }
 
 

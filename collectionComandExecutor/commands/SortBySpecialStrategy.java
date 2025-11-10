@@ -13,22 +13,22 @@ import java.util.List;
  * быть отсортированы в натуральном порядке, а с нечетными – оставаться на исходных позициях.
  */
 public class SortBySpecialStrategy implements CollectionStrategy {
-    public static void BubbleSortBySpecial(List<Data> list) {
-        Data.bubbleSort(list, (d1, d2) -> {
-            boolean d1Even = d1.getNumber() % 2 == 0;
-            boolean d2Even = d2.getNumber() % 2 == 0;
-
-            if (d1Even && d2Even) {
-                return Integer.compare(d1.getNumber(), d2.getNumber());
-            } else if (!d1Even && !d2Even) {
-                return 0;
-            } else if (d1Even) {
-                return -1;
-            } else {
-                return 1;
-            }
-        });
-    }
+//    public void SortBySpecialStrategy(List<Data> list) {
+//        Data.bubbleSort(list, (d1, d2) -> {
+//            boolean d1Even = d1.getNumber() % 2 == 0;
+//            boolean d2Even = d2.getNumber() % 2 == 0;
+//
+//            if (d1Even && d2Even) {
+//                return Integer.compare(d1.getNumber(), d2.getNumber());
+//            } else if (!d1Even && !d2Even) {
+//                return 0;
+//            } else if (d1Even) {
+//                return -1;
+//            } else {
+//                return 1;
+//            }
+//        });
+//    }
 
     @Override
     public void execute(List<Data> input) {
