@@ -1,3 +1,5 @@
+package collectionComandExecutor;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -168,5 +170,4 @@ public class CustomList<T> implements Iterable<T> {
         stream.forEach((element) -> list.add(element));
         return list;
     }
-
 }

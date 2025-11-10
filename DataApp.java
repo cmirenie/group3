@@ -20,6 +20,7 @@ public class DataApp {
     private static CollectionCommandExecutor collectionCommandExecutor = new CollectionCommandExecutor(new EmptyCollectionStrategy());
     private static InputCommandExecutor inputCommandExecutor = new InputCommandExecutor(new EmptyInputStrategy());
     private static SearchCommandExecutor searchCommandExecutor = new SearchCommandExecutor(new EmptySearchStrategy());
+
     public static void main(String[] args) throws NoSuchFieldException {
         while (true) {
             printMainMenu();
@@ -40,8 +41,9 @@ public class DataApp {
                     collectionCommandExecutor.executeCommand(dataList);
                 }
                 case 5 -> {
-                    collectionCommandExecutor.setStrategy(new CountStrategy());
-                    collectionCommandExecutor.executeCommand(dataList);
+                    countStrategyMeny();
+//                    collectionCommandExecutor.setStrategy(new CountStrategy());
+//                    collectionCommandExecutor.executeCommand(dataList);
                 }
                 case 6 -> {
                     return;
@@ -161,6 +163,43 @@ public class DataApp {
         }
     }
 
+    private static void countStrategyMeny() throws NoSuchFieldException {
+        System.out.println("1. По строковому полю");
+        System.out.println("2. По числовому полю");
+        System.out.println("3. По логическому полю");
+        System.out.println("4. Назад");
+        System.out.println("Выбор (1-4):");
+
+        int choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1 -> {
+                collectionCommandExecutor.setStrategy(new CountStrategy(
+                        Data.class.getDeclaredField("letter"),
+                        scanner
+                ));
+                finalCountCommandsRuner();
+            }
+            case 2 -> {
+                collectionCommandExecutor.setStrategy(new CountStrategy(
+                        Data.class.getDeclaredField("number"),
+                        scanner
+                ));
+                finalCountCommandsRuner();
+            }
+            case 3 -> {
+                collectionCommandExecutor.setStrategy(new CountStrategy(
+                        Data.class.getDeclaredField("logical"),
+                        scanner
+                ));
+                finalCountCommandsRuner();
+            }
+            case 4 -> {
+            }
+            default -> System.out.println("Нет такого пункта меню");
+        }
+    }
+
     private static void finalSortCommandsRuner() {
         collectionCommandExecutor.executeCommand(dataList);
         printSortResult();
@@ -183,14 +222,19 @@ public class DataApp {
     }
 
     private static void printSearchResult(List<Data> result) {
-        if (result.isEmpty()){
+        if (result.isEmpty()) {
             System.out.println("Ничего не найдено");
-        }
-        else {
+        } else {
             System.out.println("Найденные данные:");
             for (Data data : result) {
                 System.out.println(data);
             }
         }
+    }
+
+    private static void finalCountCommandsRuner() {
+        collectionCommandExecutor.executeCommand(dataList);
+        collectionCommandExecutor.setStrategy(new SaveIntoFileStrategy(scanner));
+        collectionCommandExecutor.executeCommand(dataList);
     }
 }
