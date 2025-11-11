@@ -49,7 +49,9 @@ public class InputManualStrategy implements InputStrategy {
                 userInput = scanner.nextLine();
                 if (userInput.compareTo("Н") == 0) {
                     return dataList;
-                } else if (userInput.compareTo("Д") != 0) {
+                } else if (userInput.compareTo("Д") == 0) {
+                    break;
+                } else {
                     System.out.println("Ошибка: данного варианта выбора не существует.");
                 }
             }
