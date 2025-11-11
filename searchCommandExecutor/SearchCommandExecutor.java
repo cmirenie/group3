@@ -1,6 +1,5 @@
 package searchCommandExecutor;
 
-import collectionComandExecutor.CollectionStrategy;
 import data.Data;
 
 import java.util.List;

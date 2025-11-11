@@ -1,5 +1,3 @@
-
-
 import collectionComandExecutor.CollectionCommandExecutor;
 import collectionComandExecutor.commands.*;
 import data.Data;
@@ -42,8 +40,6 @@ public class DataApp {
                 }
                 case 5 -> {
                     countStrategyMeny();
-//                    collectionCommandExecutor.setStrategy(new CountStrategy());
-//                    collectionCommandExecutor.executeCommand(dataList);
                 }
                 case 6 -> {
                     return;

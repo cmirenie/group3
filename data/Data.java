@@ -56,5 +56,4 @@ public class Data implements Comparable<Data> {
 
         return Boolean.compare(this.logical, other.logical);
     }
-
 }
