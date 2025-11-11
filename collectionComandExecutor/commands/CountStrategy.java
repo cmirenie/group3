@@ -2,15 +2,13 @@ package collectionComandExecutor.commands;
 
 import collectionComandExecutor.CollectionStrategy;
 import data.Data;
+import collectionComandExecutor.OccurrenceCounter;
 
+import java.lang.reflect.Field;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.Scanner;
+import java.util.function.Predicate;
 
 /**
  * Дополнительное задание 4: реализовать многопоточный метод,
@@ -18,59 +16,69 @@ import java.util.concurrent.TimeUnit;
  */
 
 public class CountStrategy implements CollectionStrategy {
+    private Field field;
+    private Scanner scanner;
 
-    public static <T> long countOccurrencesParallel(T[] data, T target, int threads) {
-        if (data == null || data.length == 0) return 0L;
-
-        int n = data.length;
-        int threadCount = Math.max(2, Math.min(threads, n));
-        int chunk = (n + threadCount - 1) / threadCount;
-
-        ExecutorService exec = Executors.newFixedThreadPool(threadCount);
-        try {
-            List<Future<Long>> futures = new ArrayList<>();
-
-            for (int i = 0; i < threadCount; i++) {
-                final int start = i * chunk;
-                final int end = Math.min(start + chunk, n);
-                if (start >= end) break;
-
-                futures.add(exec.submit(() -> {
-                    long cnt = 0L;
-                    for (int k = start; k < end; k++) {
-                        if (Objects.equals(target, data[k])) {
-                            cnt++;
-                        }
-                    }
-                    return cnt;
-                }));
-            }
-
-            long sum = 0L;
-            for (Future<Long> f : futures) {
-                try {
-                    sum += f.get();
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException(ie);
-                } catch (ExecutionException ee) {
-                    throw new RuntimeException(ee.getCause());
-                }
-            }
-            return sum;
-        } finally {
-            exec.shutdown();
-            try {
-                if (!exec.awaitTermination(10, TimeUnit.SECONDS)) {
-                    exec.shutdownNow();
-                }
-            } catch (InterruptedException ie) {
-                exec.shutdownNow();
-                Thread.currentThread().interrupt();
-            }
-        }
+    public CountStrategy(Field field, Scanner scanner) {
+        this.field = field;
+        this.scanner = scanner;
+        this.field.setAccessible(true);
     }
+
     @Override
     public void execute(List<Data> input) {
+        if (input == null || input.isEmpty()) {
+            System.out.println("Входной список пуст.");
+            return;
+        }
+
+        Object valueForSearch = getUserInput();
+        if (valueForSearch == null) {
+            System.out.println("Не удалось получить корректное значение для поиска.");
+            return;
+        }
+
+        // --- Многопоточный подсчет по полю ---
+
+        // Создаем предикат (условие):
+        Predicate<Data> searchCondition = dataItem -> {
+            try {
+                Object fieldValue = field.get(dataItem);
+                return Objects.equals(fieldValue, valueForSearch);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Ошибка доступа к полю при проверке: " + field.getName(), e);
+            }
+        };
+
+        // Используем новый многопоточный метод
+        long count = OccurrenceCounter.countOccurrencesByPredicateParallel(
+                input,
+                searchCondition,
+                4 // Например, используем 4 потока
+        );
+
+        System.out.println("--- Результат многопоточного подсчета ---");
+        System.out.println("Поле поиска: " + field.getName());
+        System.out.println("Искомое значение: " + valueForSearch);
+        System.out.println("Количество вхождений: " + count);
+    }
+
+    // Метод получения значения через консоль от пользователя (скопирован из BinarySearchStrategy)
+    public <T> T getUserInput() {
+        Class<?> fieldType = field.getType();
+        System.out.println("Введите значение для поиска по полю '" + field.getName() + "':");
+        String input = scanner.nextLine();
+        try {
+            if (fieldType.equals(String.class)) {
+                return (T) input;
+            } else if (fieldType.equals(int.class) || fieldType.equals(Integer.class)) {
+                return (T) Integer.valueOf(input);
+            } else if (fieldType.equals(boolean.class) || fieldType.equals(Boolean.class)) {
+                return (T) Boolean.valueOf(input);
+            }
+        } catch (Exception e) {
+            System.out.println("Ошибка при преобразовании ввода: " + e.getMessage());
+        }
+        return null;
     }
 }

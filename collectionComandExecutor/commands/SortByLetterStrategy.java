@@ -14,6 +14,4 @@ public class SortByLetterStrategy implements CollectionStrategy {
     public void execute(List<Data> input) {
         Data.bubbleSort(input, Comparator.comparing(Data::getLetter));
     }
-
-
 }
