@@ -1,21 +1,19 @@
 package inputCommandExecutor.commands;
 
-import data.Data;
-import data.DataBuilder;
 import inputCommandExecutor.InputStrategy;
+import data.Data;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-/**
- * Стратегия случайного заполнения данными
- */
-public class InputRandomStrategy implements InputStrategy {
-    private List<Data> dataList = new ArrayList<>();
-    private Scanner scanner;
-    private final String[] SAMPLE_DATA = {"A", "B", "C", "D", "E"};
+/** Стратегия: случайное заполнение коллекции. */
+public final class InputRandomStrategy implements InputStrategy {
+    private static final String[] SAMPLE_DATA = {"A", "B", "C", "D", "E"};
+
+    private final List<Data> dataList = new ArrayList<>();
+    private final Scanner scanner;
     private final Random random = new Random();
 
     public InputRandomStrategy(Scanner scanner) {
@@ -24,9 +22,10 @@ public class InputRandomStrategy implements InputStrategy {
 
     @Override
     public List<Data> execute() {
-        System.out.println("Введите колличество генерируемых элементов:");
-        int userInput = scanner.nextInt();
-        for (int i = 0; i < userInput; i++) {
+        System.out.println("Введите количество генерируемых элементов (целое неотрицательное):");
+
+        int count = readNonNegativeInt(scanner);
+        for (int i = 0; i < count; i++) {
             dataList.add(generateRandomData());
         }
         return dataList;
@@ -34,13 +33,21 @@ public class InputRandomStrategy implements InputStrategy {
 
     private Data generateRandomData() {
         String letter = SAMPLE_DATA[random.nextInt(SAMPLE_DATA.length)];
-        int number = random.nextInt(100); // Случайное значение от 0 до 99
-        boolean logical = random.nextBoolean(); // Случайное логическое значение
+        int number = random.nextInt(1_000);
+        boolean logical = random.nextBoolean();
+        return new Data(letter, number, logical);
+    }
 
-        return new DataBuilder()
-                .setLetter(letter)
-                .setNumber(number)
-                .setLogical(logical)
-                .build();
+    private static int readNonNegativeInt(Scanner sc) {
+        while (true) {
+            if (sc.hasNextInt()) {
+                int v = sc.nextInt();
+                sc.nextLine(); // съедаем перевод строки
+                if (v >= 0) return v;
+            } else {
+                sc.nextLine(); // очистка неверного токена
+            }
+            System.out.println("Ошибка. Введите целое неотрицательное число:");
+        }
     }
 }
