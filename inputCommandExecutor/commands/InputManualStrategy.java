@@ -1,19 +1,17 @@
 package inputCommandExecutor.commands;
 
-import data.Data;
-import data.DataBuilder;
 import inputCommandExecutor.InputStrategy;
+import data.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
-/**
- * Стратегия ручного ввода данных
- */
-public class InputManualStrategy implements InputStrategy {
-    private List<Data> dataList = new ArrayList<>();
-    private Scanner scanner;
+/** Стратегия: ручной ввод пользователем. */
+public final class InputManualStrategy implements InputStrategy {
+    private final List<Data> dataList = new ArrayList<>();
+    private final Scanner scanner;
 
     public InputManualStrategy(Scanner scanner) {
         this.scanner = scanner;
@@ -21,40 +19,51 @@ public class InputManualStrategy implements InputStrategy {
 
     @Override
     public List<Data> execute() {
+        System.out.println("""
+                Вводите строки формата:
+                <слово>,<число>,<true/false>
+                Примеры: A,10,true   или   test,5,false
+                Пустая строка — закончить ввод.
+                """.strip());
+
         while (true) {
-            System.out.println("Введите данные (слово, число, true/false):");
-            String userInput = scanner.nextLine();
-            String[] fields = userInput.split(",");
-            if (fields.length == 3) {
-                try {
-                    String letter = fields[0].trim();
-                    int number = Integer.parseInt(fields[1].trim());
-                    boolean logical = Boolean.parseBoolean(fields[2].trim());
+            String line = scanner.nextLine().trim();
+            if (line.isEmpty()) break;
 
-                    Data userData = new DataBuilder()
-                            .setLetter(letter)
-                            .setNumber(number)
-                            .setLogical(logical)
-                            .build();
+            String[] parts = line.split(",");
+            if (parts.length != 3) {
+                System.out.println("Ошибка: нужно три значения, разделённых запятыми. Повторите ввод.");
+                continue;
+            }
 
-                    dataList.add(userData);
-                } catch (NumberFormatException e) {
-                    System.out.println("Ошибка: поле 2 должно быть целым числом.");
-                }
-            } else {
-                System.out.println("Ошибка: необходимо ввести 3 поля.");
+            String letter = parts[0].trim();
+            Integer number = tryParseInt(parts[1].trim());
+            Boolean logical = tryParseBoolean(parts[2].trim());
+
+            if (letter.isEmpty() || number == null || logical == null) {
+                System.out.println("Ошибка разбора. Проверьте формат и повторите ввод.");
+                continue;
             }
-            while (true) {
-                System.out.println("Продолжить ввод? (Д/Н)");
-                userInput = scanner.nextLine();
-                if (userInput.compareTo("Н") == 0) {
-                    return dataList;
-                } else if (userInput.compareTo("Д") == 0) {
-                    break;
-                } else {
-                    System.out.println("Ошибка: данного варианта выбора не существует.");
-                }
-            }
+
+            dataList.add(new Data(letter, number, logical));
         }
+
+        return dataList;
+    }
+
+    private static Integer tryParseInt(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+
+    // Поддержка true/false, 1/0, да/нет
+    private static Boolean tryParseBoolean(String s) {
+        String v = s.toLowerCase(Locale.ROOT);
+        if (v.equals("true") || v.equals("1") || v.equals("да")) return true;
+        if (v.equals("false") || v.equals("0") || v.equals("нет")) return false;
+        return null;
     }
 }
